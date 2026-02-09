@@ -1,0 +1,722 @@
+{
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/customers",
+      "description": "Creates a new customer object.",
+      "parameters": [
+        {
+          "name": "name",
+          "location": "body",
+          "type": "string",
+          "required": false,
+          "description": "The customer\u2019s full name or business name."
+        },
+        {
+          "name": "email",
+          "location": "body",
+          "type": "string",
+          "required": false,
+          "description": "Customer\u2019s email address."
+        },
+        {
+          "name": "description",
+          "location": "body",
+          "type": "string",
+          "required": false,
+          "description": "An arbitrary string that you can attach to a customer object."
+        },
+        {
+          "name": "address",
+          "location": "body",
+          "type": "object",
+          "required": false,
+          "description": "The customer\u2019s address."
+        },
+        {
+          "name": "metadata",
+          "location": "body",
+          "type": "object",
+          "required": false,
+          "description": "Set of key-value pairs that you can attach to an object."
+        },
+        {
+          "name": "phone",
+          "location": "body",
+          "type": "string",
+          "required": false,
+          "description": "The customer\u2019s phone number."
+        },
+        {
+          "name": "shipping",
+          "location": "body",
+          "type": "object",
+          "required": false,
+          "description": "The customer\u2019s shipping information."
+        },
+        {
+          "name": "tax",
+          "location": "body",
+          "type": "object",
+          "required": false,
+          "description": "Tax details about the customer."
+        },
+        {
+          "name": "default_source",
+          "location": "body",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the PaymentMethod to attach to the customer."
+        },
+        {
+          "name": "business_name",
+          "location": "body",
+          "type": "string",
+          "required": false,
+          "description": "The customer\u2019s business name."
+        },
+        {
+          "name": "individual_name",
+          "location": "body",
+          "type": "string",
+          "required": false,
+          "description": "The customer\u2019s individual name."
+        },
+        {
+          "name": "invoice_prefix",
+          "location": "body",
+          "type": "string",
+          "required": false,
+          "description": "Prefix for invoices generated for this customer."
+        },
+        {
+          "name": "invoice_settings",
+          "location": "body",
+          "type": "object",
+          "required": false,
+          "description": "Invoice settings for the customer."
+        },
+        {
+          "name": "preferred_locales",
+          "location": "body",
+          "type": "array",
+          "required": false,
+          "description": "Preferred locales for this customer."
+        },
+        {
+          "name": "next_invoice_sequence",
+          "location": "body",
+          "type": "integer",
+          "required": false,
+          "description": "Next invoice sequence."
+        },
+        {
+          "name": "tax_exempt",
+          "location": "body",
+          "type": "string",
+          "required": false,
+          "description": "Tax exempt status for the customer."
+        },
+        {
+          "name": "test_clock",
+          "location": "body",
+          "type": "string",
+          "required": false,
+          "description": "Test clock status for the customer."
+        }
+      ],
+      "request_body_schema": {
+        "name": {
+          "type": "string",
+          "required": false,
+          "description": "The customer\u2019s full name or business name."
+        },
+        "email": {
+          "type": "string",
+          "required": false,
+          "description": "Customer\u2019s email address."
+        },
+        "description": {
+          "type": "string",
+          "required": false,
+          "description": "An arbitrary string that you can attach to a customer object."
+        },
+        "address": {
+          "type": "object",
+          "required": false,
+          "description": "The customer\u2019s address."
+        },
+        "metadata": {
+          "type": "object",
+          "required": false,
+          "description": "Set of key-value pairs that you can attach to an object."
+        },
+        "phone": {
+          "type": "string",
+          "required": false,
+          "description": "The customer\u2019s phone number."
+        },
+        "shipping": {
+          "type": "object",
+          "required": false,
+          "description": "The customer\u2019s shipping information."
+        },
+        "tax": {
+          "type": "object",
+          "required": false,
+          "description": "Tax details about the customer."
+        },
+        "default_source": {
+          "type": "string",
+          "required": false,
+          "description": "The ID of the PaymentMethod to attach to the customer."
+        },
+        "business_name": {
+          "type": "string",
+          "required": false,
+          "description": "The customer\u2019s business name."
+        },
+        "individual_name": {
+          "type": "string",
+          "required": false,
+          "description": "The customer\u2019s individual name."
+        },
+        "invoice_prefix": {
+          "type": "string",
+          "required": false,
+          "description": "Prefix for invoices generated for this customer."
+        },
+        "invoice_settings": {
+          "type": "object",
+          "required": false,
+          "description": "Invoice settings for the customer."
+        },
+        "preferred_locales": {
+          "type": "array",
+          "required": false,
+          "description": "Preferred locales for this customer."
+        },
+        "next_invoice_sequence": {
+          "type": "integer",
+          "required": false,
+          "description": "Next invoice sequence."
+        },
+        "tax_exempt": {
+          "type": "string",
+          "required": false,
+          "description": "Tax exempt status for the customer."
+        },
+        "test_clock": {
+          "type": "string",
+          "required": false,
+          "description": "Test clock status for the customer."
+        }
+      },
+      "response_schema": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the object."
+        },
+        "object": {
+          "type": "string",
+          "description": "String representing the object."
+        },
+        "address": {
+          "type": "object",
+          "description": "The customer\u2019s address."
+        },
+        "balance": {
+          "type": "integer",
+          "description": "Balance."
+        },
+        "created": {
+          "type": "integer",
+          "description": "Timestamp."
+        },
+        "currency": {
+          "type": "string",
+          "description": "Currency."
+        },
+        "default_source": {
+          "type": "string",
+          "description": "The ID of an Account representing a customer."
+        },
+        "delinquent": {
+          "type": "boolean",
+          "description": "Delinquent status."
+        },
+        "description": {
+          "type": "string",
+          "description": "An arbitrary string attached to the object."
+        },
+        "email": {
+          "type": "string",
+          "description": "The customer\u2019s email address."
+        },
+        "invoice_prefix": {
+          "type": "string",
+          "description": "Prefix for invoices generated for this customer."
+        },
+        "invoice_settings": {
+          "type": "object",
+          "description": "Invoice settings for the customer."
+        },
+        "livemode": {
+          "type": "boolean",
+          "description": "Livemode status."
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Set of key-value pairs that you can attach to an object."
+        },
+        "name": {
+          "type": "string",
+          "description": "The customer\u2019s full name or business name."
+        },
+        "next_invoice_sequence": {
+          "type": "integer",
+          "description": "Next invoice sequence."
+        },
+        "phone": {
+          "type": "string",
+          "description": "The customer\u2019s phone number."
+        },
+        "preferred_locales": {
+          "type": "array",
+          "description": "Preferred locales for this customer."
+        },
+        "shipping": {
+          "type": "object",
+          "description": "Mailing and shipping address for the customer."
+        },
+        "tax_exempt": {
+          "type": "string",
+          "description": "Tax exempt status for the customer."
+        },
+        "test_clock": {
+          "type": "string",
+          "description": "Test clock status for the customer."
+        }
+      },
+      "example_request": "curl https://api.stripe.com/v1/customers \n  -u \"sk_test_tR3PYbc...96tH88S4VQ2usk_test_tR3PYbcVNZZ796tH88S4VQ2u:\" \n  -d name=\"Jenny Rosen\" \n  --data-urlencode email=\"jennyrosen@example.com\"",
+      "example_response": "{  \"id\": \"cus_NffrFeUfNV2Hib\",  \"object\": \"customer\",  \"address\": null,  \"balance\": 0,  \"created\": 1680893993,  \"currency\": null,  \"default_source\": null,  \"delinquent\": false,  \"description\": null,  \"email\": \"jennyrosen@example.com\",  \"invoice_prefix\": \"0759376C\",  \"invoice_settings\": {    \"custom_fields\": null,    \"default_payment_method\": null,    \"footer\": null,    \"rendering_options\": null  },  \"livemode\": false,  \"metadata\": {},  \"name\": \"Jenny Rosen\",  \"next_invoice_sequence\": 1,  \"phone\": null,  \"preferred_locales\": [],  \"shipping\": null,  \"tax_exempt\": \"none\",  \"test_clock\": null}"
+    },
+    {
+      "method": "GET",
+      "path": "/customers/{id}",
+      "description": "Retrieves a Customer object.",
+      "parameters": [
+        {
+          "name": "id",
+          "location": "path",
+          "type": "string",
+          "required": true,
+          "description": "The unique ID of the customer."
+        }
+      ],
+      "request_body_schema": null,
+      "response_schema": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the object."
+        },
+        "object": {
+          "type": "string",
+          "description": "String representing the object."
+        },
+        "address": {
+          "type": "object",
+          "description": "The customer\u2019s address."
+        },
+        "balance": {
+          "type": "integer",
+          "description": "Balance."
+        },
+        "created": {
+          "type": "integer",
+          "description": "Timestamp."
+        },
+        "currency": {
+          "type": "string",
+          "description": "Currency."
+        },
+        "default_source": {
+          "type": "string",
+          "description": "The ID of an Account representing a customer."
+        },
+        "delinquent": {
+          "type": "boolean",
+          "description": "Delinquent status."
+        },
+        "description": {
+          "type": "string",
+          "description": "An arbitrary string attached to the object."
+        },
+        "email": {
+          "type": "string",
+          "description": "The customer\u2019s email address."
+        },
+        "invoice_prefix": {
+          "type": "string",
+          "description": "Prefix for invoices generated for this customer."
+        },
+        "invoice_settings": {
+          "type": "object",
+          "description": "Invoice settings for the customer."
+        },
+        "livemode": {
+          "type": "boolean",
+          "description": "Livemode status."
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Set of key-value pairs that you can attach to an object."
+        },
+        "name": {
+          "type": "string",
+          "description": "The customer\u2019s full name or business name."
+        },
+        "next_invoice_sequence": {
+          "type": "integer",
+          "description": "Next invoice sequence."
+        },
+        "phone": {
+          "type": "string",
+          "description": "The customer\u2019s phone number."
+        },
+        "preferred_locales": {
+          "type": "array",
+          "description": "Preferred locales for this customer."
+        },
+        "shipping": {
+          "type": "object",
+          "description": "Mailing and shipping address for the customer."
+        },
+        "tax_exempt": {
+          "type": "string",
+          "description": "Tax exempt status for the customer."
+        },
+        "test_clock": {
+          "type": "string",
+          "description": "Test clock status for the customer."
+        }
+      },
+      "example_request": "curl https://api.stripe.com/v1/customers/cus_NffrFeUfNV2Hib \n  -u \"sk_test_tR3PYbc...96tH88S4VQ2usk_test_tR3PYbcVNZZ796tH88S4VQ2u:\"",
+      "example_response": "{  \"id\": \"cus_NffrFeUfNV2Hib\",  \"object\": \"customer\",  \"address\": null,  \"balance\": 0,  \"created\": 1680893993,  \"currency\": null,  \"default_source\": null,  \"delinquent\": false,  \"description\": null,  \"email\": \"jennyrosen@example.com\",  \"invoice_prefix\": \"0759376C\",  \"invoice_settings\": {    \"custom_fields\": null,    \"default_payment_method\": null,    \"footer\": null,    \"rendering_options\": null  },  \"livemode\": false,  \"metadata\": {},  \"name\": \"Jenny Rosen\",  \"next_invoice_sequence\": 1,  \"phone\": null,  \"preferred_locales\": [],  \"shipping\": null,  \"tax_exempt\": \"none\",  \"test_clock\": null}"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/customers/{id}",
+      "description": "Updates the specified customer by setting the values of the parameters passed.",
+      "parameters": [
+        {
+          "name": "id",
+          "location": "path",
+          "type": "string",
+          "required": true,
+          "description": "The unique ID of the customer."
+        }
+      ],
+      "request_body_schema": {
+        "name": {
+          "type": "string",
+          "required": false,
+          "description": "The customer\u2019s full name or business name."
+        },
+        "email": {
+          "type": "string",
+          "required": false,
+          "description": "Customer\u2019s email address."
+        },
+        "description": {
+          "type": "string",
+          "required": false,
+          "description": "An arbitrary string that you can attach to a customer object."
+        },
+        "metadata": {
+          "type": "object",
+          "required": false,
+          "description": "Set of key-value pairs that you can attach to an object."
+        },
+        "phone": {
+          "type": "string",
+          "required": false,
+          "description": "The customer\u2019s phone number."
+        },
+        "shipping": {
+          "type": "object",
+          "required": false,
+          "description": "The customer\u2019s shipping information."
+        },
+        "tax": {
+          "type": "object",
+          "required": false,
+          "description": "Tax details about the customer."
+        },
+        "default_source": {
+          "type": "string",
+          "required": false,
+          "description": "The ID of the PaymentMethod to attach to the customer."
+        },
+        "business_name": {
+          "type": "string",
+          "required": false,
+          "description": "The customer\u2019s business name."
+        },
+        "individual_name": {
+          "type": "string",
+          "required": false,
+          "description": "The customer\u2019s individual name."
+        },
+        "invoice_prefix": {
+          "type": "string",
+          "required": false,
+          "description": "Prefix for invoices generated for this customer."
+        },
+        "invoice_settings": {
+          "type": "object",
+          "required": false,
+          "description": "Invoice settings for the customer."
+        },
+        "preferred_locales": {
+          "type": "array",
+          "required": false,
+          "description": "Preferred locales for this customer."
+        },
+        "next_invoice_sequence": {
+          "type": "integer",
+          "required": false,
+          "description": "Next invoice sequence."
+        },
+        "tax_exempt": {
+          "type": "string",
+          "required": false,
+          "description": "Tax exempt status for the customer."
+        },
+        "test_clock": {
+          "type": "string",
+          "required": false,
+          "description": "Test clock status for the customer."
+        }
+      },
+      "response_schema": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the object."
+        },
+        "object": {
+          "type": "string",
+          "description": "String representing the object."
+        },
+        "address": {
+          "type": "object",
+          "description": "The customer\u2019s address."
+        },
+        "balance": {
+          "type": "integer",
+          "description": "Balance."
+        },
+        "created": {
+          "type": "integer",
+          "description": "Timestamp."
+        },
+        "currency": {
+          "type": "string",
+          "description": "Currency."
+        },
+        "default_source": {
+          "type": "string",
+          "description": "The ID of an Account representing a customer."
+        },
+        "delinquent": {
+          "type": "boolean",
+          "description": "Delinquent status."
+        },
+        "description": {
+          "type": "string",
+          "description": "An arbitrary string attached to the object."
+        },
+        "email": {
+          "type": "string",
+          "description": "The customer\u2019s email address."
+        },
+        "invoice_prefix": {
+          "type": "string",
+          "description": "Prefix for invoices generated for this customer."
+        },
+        "invoice_settings": {
+          "type": "object",
+          "description": "Invoice settings for the customer."
+        },
+        "livemode": {
+          "type": "boolean",
+          "description": "Livemode status."
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Set of key-value pairs that you can attach to an object."
+        },
+        "name": {
+          "type": "string",
+          "description": "The customer\u2019s full name or business name."
+        },
+        "next_invoice_sequence": {
+          "type": "integer",
+          "description": "Next invoice sequence."
+        },
+        "phone": {
+          "type": "string",
+          "description": "The customer\u2019s phone number."
+        },
+        "preferred_locales": {
+          "type": "array",
+          "description": "Preferred locales for this customer."
+        },
+        "shipping": {
+          "type": "object",
+          "description": "Mailing and shipping address for the customer."
+        },
+        "tax_exempt": {
+          "type": "string",
+          "description": "Tax exempt status for the customer."
+        },
+        "test_clock": {
+          "type": "string",
+          "description": "Test clock status for the customer."
+        }
+      },
+      "example_request": "curl https://api.stripe.com/v1/customers/cus_NffrFeUfNV2Hib \n  -u \"sk_test_tR3PYbc...96tH88S4VQ2usk_test_tR3PYbcVNZZ796tH88S4VQ2u:\" \n  -d \"metadata[order_id]\"=6735",
+      "example_response": "{  \"id\": \"cus_NffrFeUfNV2Hib\",  \"object\": \"customer\",  \"address\": null,  \"balance\": 0,  \"created\": 1680893993,  \"currency\": null,  \"default_source\": null,  \"delinquent\": false,  \"description\": null,  \"email\": \"jennyrosen@example.com\",  \"invoice_prefix\": \"0759376C\",  \"invoice_settings\": {    \"custom_fields\": null,    \"default_payment_method\": null,    \"footer\": null,    \"rendering_options\": null  },  \"livemode\": false,  \"metadata\": {    \"order_id\": \"6735\"  },  \"name\": \"Jenny Rosen\",  \"next_invoice_sequence\": 1,  \"phone\": null,  \"preferred_locales\": [],  \"shipping\": null,  \"tax_exempt\": \"none\",  \"test_clock\": null}"
+    }
+  ],
+  "schemas": {
+    "Customer": {
+      "description": "Represents a customer of your business.",
+      "fields": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "description": "Unique identifier for the object."
+        },
+        "object": {
+          "type": "string",
+          "required": true,
+          "description": "String representing the object."
+        },
+        "address": {
+          "type": "object",
+          "required": false,
+          "description": "The customer\u2019s address."
+        },
+        "balance": {
+          "type": "integer",
+          "required": false,
+          "description": "Balance."
+        },
+        "created": {
+          "type": "timestamp",
+          "required": false,
+          "description": "Timestamp."
+        },
+        "currency": {
+          "type": "string",
+          "required": false,
+          "description": "Currency."
+        },
+        "default_source": {
+          "type": "string",
+          "required": false,
+          "description": "The ID of an Account representing a customer."
+        },
+        "delinquent": {
+          "type": "boolean",
+          "required": false,
+          "description": "Delinquent status."
+        },
+        "description": {
+          "type": "string",
+          "required": false,
+          "description": "An arbitrary string attached to the object."
+        },
+        "email": {
+          "type": "string",
+          "required": false,
+          "description": "The customer\u2019s email address."
+        },
+        "invoice_prefix": {
+          "type": "string",
+          "required": false,
+          "description": "Prefix for invoices generated for this customer."
+        },
+        "invoice_settings": {
+          "type": "object",
+          "required": false,
+          "description": "Invoice settings for the customer."
+        },
+        "livemode": {
+          "type": "boolean",
+          "required": false,
+          "description": "Livemode status."
+        },
+        "metadata": {
+          "type": "object",
+          "required": false,
+          "description": "Set of key-value pairs that you can attach to an object."
+        },
+        "name": {
+          "type": "string",
+          "required": false,
+          "description": "The customer\u2019s full name or business name."
+        },
+        "next_invoice_sequence": {
+          "type": "integer",
+          "required": false,
+          "description": "Next invoice sequence."
+        },
+        "phone": {
+          "type": "string",
+          "required": false,
+          "description": "The customer\u2019s phone number."
+        },
+        "preferred_locales": {
+          "type": "array",
+          "required": false,
+          "description": "Preferred locales for this customer."
+        },
+        "shipping": {
+          "type": "object",
+          "required": false,
+          "description": "Mailing and shipping address for the customer."
+        },
+        "tax_exempt": {
+          "type": "enum",
+          "required": false,
+          "description": "Tax exempt status for the customer."
+        },
+        "test_clock": {
+          "type": "string",
+          "required": false,
+          "description": "Test clock status for the customer."
+        }
+      }
+    }
+  },
+  "auth": {
+    "type": "bearer",
+    "description": "Authenticate with a Stripe secret key.",
+    "location": "header",
+    "parameter_name": "Authorization"
+  },
+  "api_info": {
+    "name": "Stripe API",
+    "base_url": "https://api.stripe.com/v1",
+    "description": "API for managing customers, charges, and other Stripe resources.",
+    "version": "v1"
+  },
+  "pages_analyzed": [
+    {
+      "url": "https://stripe.com/docs/api/customers",
+      "method": "llm_extraction"
+    }
+  ]
+}
