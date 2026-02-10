@@ -3,6 +3,7 @@ from crawler import APICrawler
 from prompts import create_mapping_prompt
 from llm import GeminiClient
 import json
+from openapi_builder import build_openapi_spec
 
 st.set_page_config(
     page_title="API Integration Assistant",
@@ -32,7 +33,7 @@ with col1:
         help="Can be OpenAPI spec URL or any documentation page",
         key="api_a"
     )
-    
+  
     if st.button("🔍 Preview API A"):
         if api_a_url:
             with st.spinner("Fetching preview..."):
@@ -90,6 +91,7 @@ if st.button("🚀 Analyze & Map APIs", type="primary", use_container_width=True
             status_text.text(f"🕷️ API A: {message}")
         
         data_a = crawler_a.crawl(api_a_url, progress_callback=update_progress_a)
+
         
         # Crawl API B
         status_text.text("🕷️ Crawling API B documentation...")
@@ -128,7 +130,15 @@ if 'data_a' in st.session_state and 'data_b' in st.session_state:
     with col1:
         st.subheader("🔵 API A")
         data_a = st.session_state['data_a']
-        
+        openapi_a = build_openapi_spec(data_a)
+        st.download_button(
+            "📘 Download API A – OpenAPI spec",
+            data=json.dumps(openapi_a, indent=2),
+            file_name="api_a_openapi.json",
+            mime="application/json"
+        )
+
+
         st.metric("Endpoints", len(data_a['endpoints']))
         st.metric("Schemas", len(data_a['schemas']))
         st.metric("Pages Analyzed", len(data_a['pages_analyzed']))
@@ -154,7 +164,16 @@ if 'data_a' in st.session_state and 'data_b' in st.session_state:
     with col2:
         st.subheader("🟢 API B")
         data_b = st.session_state['data_b']
-        
+        openapi_b = build_openapi_spec(data_b)
+
+        st.download_button(
+            "📗 Download API B – OpenAPI spec",
+            data=json.dumps(openapi_b, indent=2),
+            file_name="api_b_openapi.json",
+            mime="application/json"
+        )       
+
+
         st.metric("Endpoints", len(data_b['endpoints']))
         st.metric("Schemas", len(data_b['schemas']))
         st.metric("Pages Analyzed", len(data_b['pages_analyzed']))

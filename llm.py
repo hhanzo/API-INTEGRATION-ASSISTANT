@@ -19,9 +19,9 @@ class GeminiClient:
         
         # Use Gemini 1.5 Pro for best results
         #self.model = genai.GenerativeModel('gemini-3-flash-preview')
-        self.model = genai.GenerativeModel('gemma-3-12b-it')
+        self.model = genai.GenerativeModel('gemma-3-27b-it')
         #for model in genai.list_models():
-         #   print(f"Available model: {model.name}")
+          #print(f"Available model: {model.name}")
 
         # Generation config
         self.generation_config = {
