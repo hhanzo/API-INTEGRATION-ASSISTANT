@@ -1,5 +1,5 @@
 import streamlit as st
-from crawler import APICrawler
+from extractor import APIExtractor
 from openapi_builder import build_openapi_spec, validate_openapi_spec
 import json
 import yaml
@@ -59,70 +59,106 @@ if st.button("🚀 Extract APIs to OpenAPI 3.1.0", type="primary", use_container
         progress_bar = st.progress(0)
         status_text = st.empty()
         
-        # Crawl API A
-        status_text.text("🕷️ Extracting API A...")
-        
-        crawler_a = APICrawler(max_pages=max_pages, delay=crawl_delay)
-        
-        def update_progress_a(current, total, message):
-            progress = int((current / total) * 45)
-            progress_bar.progress(progress)
-            status_text.text(f"🕷️ API A: {message}")
-        
-        data_a = crawler_a.crawl(api_a_url, progress_callback=update_progress_a)
-        
-        # Build OpenAPI spec for A
-        status_text.text("🔨 Building OpenAPI spec for API A...")
-        progress_bar.progress(48)
-        openapi_a = build_openapi_spec(data_a)
-        openapi_a['info']['x-source-url'] = api_a_url
-        
-        # Validate
-        is_valid_a, errors_a = validate_openapi_spec(openapi_a)
-        
-        # Crawl API B
-        status_text.text("🕷️ Extracting API B...")
-        
-        crawler_b = APICrawler(max_pages=max_pages, delay=crawl_delay)
-        
-        def update_progress_b(current, total, message):
-            progress = 50 + int((current / total) * 45)
-            progress_bar.progress(progress)
-            status_text.text(f"🕷️ API B: {message}")
-        
-        data_b = crawler_b.crawl(api_b_url, progress_callback=update_progress_b)
-        
-        # Build OpenAPI spec for B
-        status_text.text("🔨 Building OpenAPI spec for API B...")
-        progress_bar.progress(98)
-        openapi_b = build_openapi_spec(data_b)
-        openapi_b['info']['x-source-url'] = api_b_url
-        
-        # Validate
-        is_valid_b, errors_b = validate_openapi_spec(openapi_b)
-        
+        # Initialize holders
+        openapi_a = openapi_b = None
+        is_valid_a = is_valid_b = False
+        errors_a = []
+        errors_b = []
+        meta_a = {}
+        meta_b = {}
+
+        # Extract API A
+        status_text.text("🧠 Analyzing API A documentation...")
+        progress_bar.progress(10)
+
+        extractor_a = APIExtractor()
+        result_a = extractor_a.extract_from_url(api_a_url)
+
+        if not result_a.get("success"):
+            st.error(f"API A extraction failed: {result_a.get('error', 'Unknown error')}")
+        else:
+            extracted_a = result_a.get("data") or {}
+            # Fallback: ensure source_url is present for builders and UI
+            api_info_a = extracted_a.get("api_info", {})
+            if not api_info_a.get("source_url"):
+                api_info_a["source_url"] = api_a_url
+                extracted_a["api_info"] = api_info_a
+
+            meta_a = {
+                "method": result_a.get("method"),
+                "doc_type": result_a.get("doc_type"),
+                "needs_more_pages": bool(extracted_a.get("needs_more_pages")),
+                "suggested_urls": extracted_a.get("suggested_urls") or [],
+            }
+
+            # Build OpenAPI spec for A
+            status_text.text("🔨 Building OpenAPI spec for API A...")
+            progress_bar.progress(40)
+            openapi_a = build_openapi_spec(extracted_a)
+
+            # Validate
+            status_text.text("✅ Validating OpenAPI spec for API A...")
+            is_valid_a, errors_a = validate_openapi_spec(openapi_a)
+
+        # Extract API B
+        status_text.text("🧠 Analyzing API B documentation...")
+        progress_bar.progress(55)
+
+        extractor_b = APIExtractor()
+        result_b = extractor_b.extract_from_url(api_b_url)
+
+        if not result_b.get("success"):
+            st.error(f"API B extraction failed: {result_b.get('error', 'Unknown error')}")
+        else:
+            extracted_b = result_b.get("data") or {}
+            # Fallback: ensure source_url is present for builders and UI
+            api_info_b = extracted_b.get("api_info", {})
+            if not api_info_b.get("source_url"):
+                api_info_b["source_url"] = api_b_url
+                extracted_b["api_info"] = api_info_b
+
+            meta_b = {
+                "method": result_b.get("method"),
+                "doc_type": result_b.get("doc_type"),
+                "needs_more_pages": bool(extracted_b.get("needs_more_pages")),
+                "suggested_urls": extracted_b.get("suggested_urls") or [],
+            }
+
+            # Build OpenAPI spec for B
+            status_text.text("🔨 Building OpenAPI spec for API B...")
+            progress_bar.progress(80)
+            openapi_b = build_openapi_spec(extracted_b)
+
+            # Validate
+            status_text.text("✅ Validating OpenAPI spec for API B...")
+            is_valid_b, errors_b = validate_openapi_spec(openapi_b)
+
+        # Finalize progress
         progress_bar.progress(100)
         status_text.text("✅ Extraction complete!")
-        
-        # Store in session state
-        st.session_state['openapi_a'] = openapi_a
-        st.session_state['openapi_b'] = openapi_b
-        st.session_state['is_valid_a'] = is_valid_a
-        st.session_state['is_valid_b'] = is_valid_b
-        st.session_state['errors_a'] = errors_a
-        st.session_state['errors_b'] = errors_b
-        
-        # Success message
-        st.success(f"""
-        ✅ **Extraction Complete!**
-        - API A: {len(openapi_a.get('paths', {}))} paths, {len(openapi_a.get('components', {}).get('schemas', {}))} schemas
-        - API B: {len(openapi_b.get('paths', {}))} paths, {len(openapi_b.get('components', {}).get('schemas', {}))} schemas
-        """)
-        
-        if not is_valid_a or not is_valid_b:
-            st.warning("⚠️ Some validation warnings detected. See details below.")
-        
-        st.balloons()
+
+        # Store in session state if both APIs were successfully built
+        if openapi_a is not None and openapi_b is not None:
+            st.session_state['openapi_a'] = openapi_a
+            st.session_state['openapi_b'] = openapi_b
+            st.session_state['is_valid_a'] = is_valid_a
+            st.session_state['is_valid_b'] = is_valid_b
+            st.session_state['errors_a'] = errors_a
+            st.session_state['errors_b'] = errors_b
+            st.session_state['meta_a'] = meta_a
+            st.session_state['meta_b'] = meta_b
+
+            # Success message
+            st.success(f"""
+            ✅ **Extraction Complete!**
+            - API A: {len(openapi_a.get('paths', {}))} paths, {len(openapi_a.get('components', {}).get('schemas', {}))} schemas
+            - API B: {len(openapi_b.get('paths', {}))} paths, {len(openapi_b.get('components', {}).get('schemas', {}))} schemas
+            """)
+
+            if not is_valid_a or not is_valid_b:
+                st.warning("⚠️ Some validation warnings detected. See details below.")
+
+            st.balloons()
 
 # Display results
 if 'openapi_a' in st.session_state and 'openapi_b' in st.session_state:
@@ -135,6 +171,25 @@ if 'openapi_a' in st.session_state and 'openapi_b' in st.session_state:
         st.subheader("🔵 API A")
         openapi_a = st.session_state['openapi_a']
         is_valid_a = st.session_state['is_valid_a']
+        meta_a = st.session_state.get('meta_a', {})
+
+        # Source / extraction metadata
+        method_a = meta_a.get("method")
+        doc_type_a = meta_a.get("doc_type")
+        if method_a == "openapi":
+            st.caption("Source: OpenAPI/Swagger specification URL")
+        elif method_a == "llm_extraction":
+            doc_label_a = doc_type_a or "unknown"
+            st.caption(f"Source: Scraped documentation + LLM extraction ({doc_label_a} style)")
+        elif method_a:
+            st.caption(f"Source method: {method_a}")
+
+        if meta_a.get("needs_more_pages"):
+            suggested_a = meta_a.get("suggested_urls") or []
+            if suggested_a:
+                st.caption("Additional suggested documentation pages detected:")
+                for s_url in suggested_a[:3]:
+                    st.write(f"- {s_url}")
         
         # Validation status
         if is_valid_a:
@@ -188,6 +243,25 @@ if 'openapi_a' in st.session_state and 'openapi_b' in st.session_state:
         st.subheader("🟢 API B")
         openapi_b = st.session_state['openapi_b']
         is_valid_b = st.session_state['is_valid_b']
+        meta_b = st.session_state.get('meta_b', {})
+
+        # Source / extraction metadata
+        method_b = meta_b.get("method")
+        doc_type_b = meta_b.get("doc_type")
+        if method_b == "openapi":
+            st.caption("Source: OpenAPI/Swagger specification URL")
+        elif method_b == "llm_extraction":
+            doc_label_b = doc_type_b or "unknown"
+            st.caption(f"Source: Scraped documentation + LLM extraction ({doc_label_b} style)")
+        elif method_b:
+            st.caption(f"Source method: {method_b}")
+
+        if meta_b.get("needs_more_pages"):
+            suggested_b = meta_b.get("suggested_urls") or []
+            if suggested_b:
+                st.caption("Additional suggested documentation pages detected:")
+                for s_url in suggested_b[:3]:
+                    st.write(f"- {s_url}")
         
         # Validation status
         if is_valid_b:

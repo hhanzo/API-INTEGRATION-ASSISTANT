@@ -23,6 +23,11 @@ class APIExtractor:
         # Strategy 1: Try OpenAPI spec
         openapi_result = self._try_openapi(url)
         if openapi_result:
+            # Ensure source URL is tracked in api_info for downstream builders
+            api_info = openapi_result.get('api_info', {})
+            if not api_info.get('source_url'):
+                api_info['source_url'] = url
+                openapi_result['api_info'] = api_info
             return {
                 'success': True,
                 'method': 'openapi',
@@ -126,7 +131,13 @@ class APIExtractor:
             
             if result['parsed']:
                 # Validate and clean the response
-                return self._validate_and_clean_response(result['parsed'])
+                cleaned = self._validate_and_clean_response(result['parsed'])
+                # Ensure source URL is recorded in api_info
+                api_info = cleaned.get('api_info', {})
+                if not api_info.get('source_url'):
+                    api_info['source_url'] = url
+                    cleaned['api_info'] = api_info
+                return cleaned
         
         return None
     
