@@ -2,6 +2,7 @@ import streamlit as st
 from extractor import APIExtractor
 from openapi_builder import build_openapi_spec, validate_openapi_spec
 from mapper import generate_mappings
+from plan_generator import generate_integration_plan, render_integration_plan_markdown
 from questionnaire import (
     merge_with_defaults,
     questionnaire_option_sets,
@@ -203,6 +204,73 @@ def _render_questionnaire_section() -> None:
             mime="application/json",
             use_container_width=True,
         )
+
+
+def _render_plan_generation_section(openapi_a: dict, openapi_b: dict) -> None:
+    """Render Phase 5 plan generation controls and outputs."""
+    st.divider()
+    st.header("🗺️ Integration Plan")
+    st.caption("Generate a deterministic integration plan from mappings and saved answers.")
+
+    if st.button("🛠️ Generate Integration Plan", type="primary", use_container_width=True):
+        mapping_result = st.session_state.get("mapping_result", {})
+        answers = st.session_state.get("integration_answers", {})
+
+        with st.spinner("Generating integration plan..."):
+            plan_outcome = generate_integration_plan(
+                openapi_a=openapi_a,
+                openapi_b=openapi_b,
+                mapping_result=mapping_result,
+                integration_answers=answers,
+            )
+
+        st.session_state["integration_plan"] = plan_outcome.get("data", {})
+        st.session_state["integration_plan_error"] = plan_outcome.get("error")
+        st.session_state["integration_plan_validation_errors"] = plan_outcome.get(
+            "validation_errors", []
+        )
+
+        if plan_outcome.get("success"):
+            st.success("✅ Integration plan generated")
+        else:
+            st.error("❌ Integration plan generated with validation fallback")
+
+    if "integration_plan" in st.session_state:
+        plan = st.session_state["integration_plan"]
+        plan_error = st.session_state.get("integration_plan_error")
+        validation_errors = st.session_state.get("integration_plan_validation_errors", [])
+
+        if plan_error:
+            st.caption(f"Plan generation note: {plan_error}")
+        if validation_errors:
+            st.warning("Validation issues detected while building the plan:")
+            for err in validation_errors:
+                st.write(f"- {err}")
+
+        with st.expander("👁️ Preview Integration Plan (JSON)", expanded=True):
+            st.code(json.dumps(plan, indent=2), language="json")
+
+        markdown_plan = render_integration_plan_markdown(plan)
+        with st.expander("📝 Preview Integration Plan (Markdown)"):
+            st.markdown(markdown_plan)
+
+        col_export_json, col_export_md = st.columns(2)
+        with col_export_json:
+            st.download_button(
+                label="📥 Download Integration Plan (JSON)",
+                data=json.dumps(plan, indent=2),
+                file_name="integration_plan.json",
+                mime="application/json",
+                use_container_width=True,
+            )
+        with col_export_md:
+            st.download_button(
+                label="📥 Download Integration Plan (Markdown)",
+                data=markdown_plan,
+                file_name="integration_plan.md",
+                mime="text/markdown",
+                use_container_width=True,
+            )
 
 # Sidebar settings
 with st.sidebar:
@@ -574,3 +642,6 @@ if 'openapi_a' in st.session_state and 'openapi_b' in st.session_state:
         )
 
         _render_questionnaire_section()
+
+        if "integration_answers" in st.session_state:
+            _render_plan_generation_section(openapi_a=openapi_a, openapi_b=openapi_b)
