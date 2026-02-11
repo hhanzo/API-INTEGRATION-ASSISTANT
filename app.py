@@ -2,6 +2,11 @@ import streamlit as st
 from extractor import APIExtractor
 from openapi_builder import build_openapi_spec, validate_openapi_spec
 from mapper import generate_mappings
+from questionnaire import (
+    merge_with_defaults,
+    questionnaire_option_sets,
+    validate_questionnaire_answers,
+)
 import json
 import yaml
 
@@ -88,6 +93,116 @@ def _render_mapping_results(mapping_result: dict) -> None:
                     st.write(f"- {item}")
             else:
                 st.caption("None")
+
+
+def _render_questionnaire_section() -> None:
+    """Render guided integration questionnaire and persist answers."""
+    st.divider()
+    st.header("🧩 Integration Decisions Questionnaire")
+    st.caption("Capture business and technical integration decisions required for final planning.")
+
+    option_sets = questionnaire_option_sets()
+    defaults = merge_with_defaults(st.session_state.get("integration_answers"))
+
+    with st.form("integration_questionnaire_form"):
+        col_q1, col_q2 = st.columns(2)
+
+        with col_q1:
+            goal = st.selectbox("Integration goal", option_sets["goal"], index=option_sets["goal"].index(defaults["goal"]))
+            source_of_truth = st.selectbox(
+                "Source of truth",
+                option_sets["source_of_truth"],
+                index=option_sets["source_of_truth"].index(defaults["source_of_truth"]),
+            )
+            sync_direction = st.selectbox(
+                "Sync direction",
+                option_sets["sync_direction"],
+                index=option_sets["sync_direction"].index(defaults["sync_direction"]),
+            )
+            trigger_mode = st.selectbox(
+                "Trigger mode",
+                option_sets["trigger_mode"],
+                index=option_sets["trigger_mode"].index(defaults["trigger_mode"]),
+            )
+            latency_slo = st.selectbox(
+                "Latency target",
+                option_sets["latency_slo"],
+                index=option_sets["latency_slo"].index(defaults["latency_slo"]),
+            )
+
+        with col_q2:
+            conflict_strategy = st.selectbox(
+                "Conflict strategy",
+                option_sets["conflict_strategy"],
+                index=option_sets["conflict_strategy"].index(defaults["conflict_strategy"]),
+            )
+            error_strategy = st.selectbox(
+                "Error strategy",
+                option_sets["error_strategy"],
+                index=option_sets["error_strategy"].index(defaults["error_strategy"]),
+            )
+            pii_handling = st.selectbox(
+                "PII handling",
+                option_sets["pii_handling"],
+                index=option_sets["pii_handling"].index(defaults["pii_handling"]),
+            )
+            idempotency = st.checkbox("Require idempotency", value=bool(defaults["idempotency"]))
+            max_retries = st.number_input(
+                "Max retries",
+                min_value=0,
+                max_value=20,
+                value=int(defaults.get("retry_policy", {}).get("max_retries", 3)),
+                step=1,
+            )
+            backoff = st.selectbox(
+                "Retry backoff",
+                option_sets["backoff"],
+                index=option_sets["backoff"].index(defaults.get("retry_policy", {}).get("backoff", "exponential")),
+            )
+
+        ownership_notes = st.text_area(
+            "Ownership notes (required)",
+            value=defaults.get("ownership_notes", ""),
+            placeholder="e.g., Platform team owns mapping rules and on-call support",
+            height=90,
+        )
+
+        save_questionnaire = st.form_submit_button("💾 Save Integration Answers", use_container_width=True)
+
+    if save_questionnaire:
+        answers = {
+            "goal": goal,
+            "source_of_truth": source_of_truth,
+            "sync_direction": sync_direction,
+            "trigger_mode": trigger_mode,
+            "latency_slo": latency_slo,
+            "conflict_strategy": conflict_strategy,
+            "error_strategy": error_strategy,
+            "retry_policy": {"max_retries": int(max_retries), "backoff": backoff},
+            "idempotency": bool(idempotency),
+            "pii_handling": pii_handling,
+            "ownership_notes": ownership_notes,
+        }
+
+        is_valid, errors = validate_questionnaire_answers(answers)
+        if is_valid:
+            st.session_state["integration_answers"] = merge_with_defaults(answers)
+            st.success("✅ Integration answers saved")
+        else:
+            st.error("❌ Please fix questionnaire validation issues:")
+            for error in errors:
+                st.write(f"- {error}")
+
+    if "integration_answers" in st.session_state:
+        st.subheader("📌 Saved Integration Answers")
+        st.code(json.dumps(st.session_state["integration_answers"], indent=2), language="json")
+        st.download_button(
+            label="📥 Download Integration Answers (JSON)",
+            data=json.dumps(st.session_state["integration_answers"], indent=2),
+            file_name="integration_answers.json",
+            mime="application/json",
+            use_container_width=True,
+        )
 
 # Sidebar settings
 with st.sidebar:
@@ -457,3 +572,5 @@ if 'openapi_a' in st.session_state and 'openapi_b' in st.session_state:
             mime="application/json",
             use_container_width=True,
         )
+
+        _render_questionnaire_section()
