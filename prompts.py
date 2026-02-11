@@ -2,7 +2,7 @@ import json
 
 def create_mapping_prompt(parsed_a: dict, parsed_b: dict) -> str:
     """
-    Create prompt for Claude to identify entity and field mappings.
+    Create prompt for Gemini/LLM to identify entity and field mappings.
     """
     
     # Prepare simplified view of schemas
@@ -50,7 +50,8 @@ Respond in this EXACT JSON format:
     }}
   ],
   "unmapped_entities_a": ["Order", "Payment"],
-  "unmapped_entities_b": ["Invoice"]
+  "unmapped_entities_b": ["Invoice"],
+  "warnings": ["Potential type mismatch for created_at"]
 }}
 
 Return ONLY valid JSON, no other text."""
