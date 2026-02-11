@@ -1,6 +1,7 @@
 import streamlit as st
 from extractor import APIExtractor
 from openapi_builder import build_openapi_spec, validate_openapi_spec
+from mapper import generate_mappings
 import json
 import yaml
 
@@ -12,6 +13,81 @@ st.set_page_config(
 
 st.title("🔗 Universal API Integration Assistant")
 st.markdown("Extract API specs from **any** documentation and generate **OpenAPI 3.1.0** specifications.")
+
+
+def _render_mapping_results(mapping_result: dict) -> None:
+    """Render entity and field mappings in the app."""
+    entity_mappings = mapping_result.get("entity_mappings", [])
+    warnings = mapping_result.get("warnings", [])
+
+    if warnings:
+        st.warning("⚠️ Mapping warnings detected:")
+        for warning in warnings:
+            st.write(f"- {warning}")
+
+    if not entity_mappings:
+        st.info("No entity mappings were identified yet.")
+        return
+
+    st.success(
+        f"Found {len(entity_mappings)} entity mapping(s) with "
+        f"{sum(len(m.get('field_mappings', [])) for m in entity_mappings)} field mapping(s)."
+    )
+
+    for idx, entity_map in enumerate(entity_mappings, start=1):
+        api_a_entity = entity_map.get("api_a_entity", "Unknown")
+        api_b_entity = entity_map.get("api_b_entity", "Unknown")
+        confidence = entity_map.get("confidence", "UNKNOWN")
+        reasoning = entity_map.get("reasoning", "")
+
+        with st.expander(
+            f"{idx}. {api_a_entity} → {api_b_entity} ({confidence})",
+            expanded=(idx == 1),
+        ):
+            if reasoning:
+                st.caption(reasoning)
+
+            field_rows = []
+            for field_map in entity_map.get("field_mappings", []):
+                transformation = field_map.get("transformation")
+                if isinstance(transformation, dict):
+                    transformation_value = json.dumps(transformation)
+                else:
+                    transformation_value = transformation if transformation is not None else ""
+
+                field_rows.append(
+                    {
+                        "API A Field": field_map.get("api_a_field", ""),
+                        "API B Field": field_map.get("api_b_field", ""),
+                        "Confidence": field_map.get("confidence", ""),
+                        "Transformation": transformation_value,
+                        "Notes": field_map.get("notes", ""),
+                    }
+                )
+
+            if field_rows:
+                st.dataframe(field_rows, use_container_width=True)
+            else:
+                st.info("No field-level mappings provided for this entity pair.")
+
+    unmapped_a = mapping_result.get("unmapped_entities_a", [])
+    unmapped_b = mapping_result.get("unmapped_entities_b", [])
+    if unmapped_a or unmapped_b:
+        col_unmapped_a, col_unmapped_b = st.columns(2)
+        with col_unmapped_a:
+            st.write("**Unmapped Entities in API A**")
+            if unmapped_a:
+                for item in unmapped_a:
+                    st.write(f"- {item}")
+            else:
+                st.caption("None")
+        with col_unmapped_b:
+            st.write("**Unmapped Entities in API B**")
+            if unmapped_b:
+                for item in unmapped_b:
+                    st.write(f"- {item}")
+            else:
+                st.caption("None")
 
 # Sidebar settings
 with st.sidebar:
@@ -147,6 +223,10 @@ if st.button("🚀 Extract APIs to OpenAPI 3.1.0", type="primary", use_container
             st.session_state['errors_b'] = errors_b
             st.session_state['meta_a'] = meta_a
             st.session_state['meta_b'] = meta_b
+            # Reset downstream stages when extraction is re-run
+            st.session_state.pop('mapping_result', None)
+            st.session_state.pop('mapping_error', None)
+            st.session_state.pop('mapping_raw_response', None)
 
             # Success message
             st.success(f"""
@@ -334,3 +414,46 @@ if 'openapi_a' in st.session_state and 'openapi_b' in st.session_state:
     with col_download2:
         # ZIP file would require additional library
         st.info("💡 Download each API separately above")
+
+    # Mapping stage
+    st.divider()
+    st.header("🧭 Entity & Field Mapping")
+    st.caption(
+        "Generate mapping candidates between API A and API B using the extracted OpenAPI specs."
+    )
+
+    if st.button("🧠 Generate Field Mappings", type="secondary", use_container_width=True):
+        with st.spinner("Generating mappings..."):
+            mapping_outcome = generate_mappings(openapi_a, openapi_b)
+
+        st.session_state['mapping_result'] = mapping_outcome.get('data', {})
+        st.session_state['mapping_error'] = mapping_outcome.get('error')
+        st.session_state['mapping_raw_response'] = mapping_outcome.get('raw_response')
+
+        if mapping_outcome.get('success'):
+            st.success("✅ Mapping generation complete")
+        else:
+            st.error(
+                "❌ Mapping generation had issues. Showing fallback output with warnings."
+            )
+
+    if 'mapping_result' in st.session_state:
+        mapping_error = st.session_state.get('mapping_error')
+        if mapping_error:
+            st.caption(f"Last mapping error: {mapping_error}")
+
+        _render_mapping_results(st.session_state['mapping_result'])
+
+        with st.expander("👁️ Preview Raw Mapping JSON"):
+            st.code(
+                json.dumps(st.session_state['mapping_result'], indent=2),
+                language='json',
+            )
+
+        st.download_button(
+            label="📥 Download Mapping Result (JSON)",
+            data=json.dumps(st.session_state['mapping_result'], indent=2),
+            file_name="api_mapping_result.json",
+            mime="application/json",
+            use_container_width=True,
+        )
