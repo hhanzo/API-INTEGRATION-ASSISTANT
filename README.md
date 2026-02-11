@@ -45,6 +45,22 @@ LLM-assisted extraction is still used for non-OpenAPI documentation pages.
 
 If `GEMINI_API_KEY` is missing, LLM-based extraction paths will fail to initialize.
 
+
+## Dependency Management
+### Runtime dependencies (`requirements.txt`)
+The runtime dependency set is pinned and aligned to imports used by the app:
+- `streamlit`, `requests`, `pyyaml`
+- `python-dotenv`, `google-generativeai`
+- `beautifulsoup4`, `lxml`, `readability-lxml`
+
+### Dependency audit notes
+- Removed `anthropic` and `openai`: no active imports or usage in the current codebase.
+- Removed `jsonschema`: OpenAPI validation is currently implemented with project-local checks in `openapi_builder.py`, not the `jsonschema` package.
+- Kept `lxml`: used as the BeautifulSoup parser backend (`BeautifulSoup(..., "lxml")`) in the scraper pipeline.
+
+### Development dependencies (`requirements-dev.txt`)
+Development and test tooling is isolated in `requirements-dev.txt` so runtime installs stay minimal while local lint/format/test workflows remain reproducible.
+
 ## Testing
 ### Automated / scripted checks
 This repo currently includes script-style checks (not a formal `pytest` suite). Common files:
