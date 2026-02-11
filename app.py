@@ -207,7 +207,7 @@ def _render_questionnaire_section() -> None:
 
 
 def _render_plan_generation_section(openapi_a: dict, openapi_b: dict) -> None:
-    """Render Phase 5 plan generation controls and outputs."""
+    """Render integration plan generation controls and outputs."""
     st.divider()
     st.header("🗺️ Integration Plan")
     st.caption("Generate a deterministic integration plan from mappings and saved answers.")
@@ -274,15 +274,10 @@ def _render_plan_generation_section(openapi_a: dict, openapi_b: dict) -> None:
 
 # Sidebar settings
 with st.sidebar:
-    st.header("⚙️ Extraction Settings")
-    max_pages = st.slider("Max pages to crawl", 1, 20, 5)
-    crawl_delay = st.slider("Delay between requests (seconds)", 0.5, 3.0, 1.0)
-    
-    st.divider()
     st.header("📥 Output Format")
     output_format = st.radio("OpenAPI format", ["JSON", "YAML"], index=0)
-    
-    st.info("**Tip:** Start with 5 pages. Increase if documentation is spread across many pages.")
+
+    st.info("**Tip:** Review generated mappings before saving integration answers.")
 
 # Input section
 col1, col2 = st.columns(2)
@@ -410,6 +405,10 @@ if st.button("🚀 Extract APIs to OpenAPI 3.1.0", type="primary", use_container
             st.session_state.pop('mapping_result', None)
             st.session_state.pop('mapping_error', None)
             st.session_state.pop('mapping_raw_response', None)
+            st.session_state.pop('integration_answers', None)
+            st.session_state.pop('integration_plan', None)
+            st.session_state.pop('integration_plan_error', None)
+            st.session_state.pop('integration_plan_validation_errors', None)
 
             # Success message
             st.success(f"""
